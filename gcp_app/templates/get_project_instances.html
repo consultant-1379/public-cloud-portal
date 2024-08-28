@@ -1,0 +1,13 @@
+{%extends 'gcp_base.html'%}
+{%block content%}
+
+
+<form id="get_project_instances" method="POST" action="{% url 'project_instances'%}">
+    <div class="form-floating mb-3"></div>
+        {% csrf_token %}
+        <label for="project_id_input">Project ID:</label>
+        <input type="text" class="form-control" id="project_id_input" name="project_id" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{%endblock%}

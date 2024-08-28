@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+{% extends 'main.html' %}
+{% block content %}
+<html>
+<head>
+  <title>Cloud Provider Cost Graphs</title>
+  <style>
+    /* Flexbox container to display charts side by side */
+    .chart-container {
+        display: flex;
+        justify-content: space-around;
+        padding-top: 50px; /* Add padding to the top */
+        text-align: center; /* Center the content */
+    }
+
+    /* Set the width of each chart based on the number of data points */
+    .chart-container canvas {
+        max-height: 600px; /* Set a fixed maximum height for all charts */
+        width: 100%; /* Set the initial width to 100% to fill available space */
+        min-width: 300px; /* Set a minimum width for the charts */
+        max-width: 600px; /* Set a maximum width for the charts */
+    }
+  </style>
+</head>
+<body>
+  <div class="chart-container">
+    <div>
+      <h1>{{ provider_name }} Cost Stats</h1>
+      <canvas id="{{ provider_name }}Chart" width="600" height="400"></canvas>
+    </div>
+  </div>
+
+  {% if start_date %}
+  <p>Selected Dates: {{ start_date }} to {{ end_date }}</p>
+  {% endif %}
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Data for the selected provider
+  let providerData = {
+    labels: [{% for day in days_in_range %}"{{ day }}",{% endfor %}],
+    datasets: [{
+      label: "{{ provider_name }} Cost per Day",
+      data: [{% for cost in cost_list %}{{ cost }},{% endfor %}],
+      borderColor: 'blue',
+      borderWidth: 1,
+      fill: false
+    }]
+  };
+
+  // Create a chart with default data
+  const providerCtx = document.getElementById('{{ provider_name }}Chart').getContext('2d');
+
+  const providerChart = new Chart(providerCtx, {
+    type: 'line',
+    data: providerData,
+    options: {
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Days'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Cost'
+          }
+        }
+      }
+    }
+  });
+
+  // Set the end date to the current date
+  const currentDate = new Date();
+  const endDate = currentDate.toISOString().split('T')[0];  // Format as 'YYYY-MM-DD'
+
+  // Update the chart with the last 21 days
+  updateChart(endDate);
+
+  function updateChart(endDate) {
+    // Convert end date to JavaScript Date object
+    const endDateObj = new Date(endDate);
+
+    // Loop through the original dataset and set data to null for dates outside the selected range
+    providerChart.data.datasets[0].data = providerData.datasets[0].data.map((cost, index) => {
+      const dayDateObj = new Date(providerData.labels[index]);
+      return dayDateObj <= endDateObj ? cost : null;
+    });
+
+    // Update the labels to show only those within the selected date range
+    const providerDataFiltered = providerData.labels.filter((day) => {
+      const dayDateObj = new Date(day);
+      return dayDateObj <= endDateObj;
+    });
+
+    // Update the chart's labels with filtered data
+    providerChart.data.labels = providerDataFiltered;
+
+    // Update the chart
+    providerChart.update();
+  }
+
+</script>
+</body>
+{% endblock %}
+</html>

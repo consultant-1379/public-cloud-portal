@@ -1,0 +1,53 @@
+{% extends 'main.html' %} {% block content %}
+
+        <section class="content" ng-show="!transitioning" style>
+        <section class="container">
+        <section ui-view class style>
+        <section>
+
+        <div class="home-page-welcome">
+        <h1> Welcome to Billow</h1>
+        </div>
+
+        <br>
+        </section>
+        </section>
+        </section>
+        </section>
+        <br>
+
+        <div class="eaLogin">
+         <div class="eaLogin-inner">
+          <div class="eaLogin-ericssonLogo"></div>
+           <div class="eaLogin-body eaLogin-login" style="display; block;">
+            <div class="eaLogin-title">Billow</div>
+            	{% if request.user.is_authenticated %}
+            	<h3>You are already logged in</h3>
+            	{% else %}
+              <form id="billow-login" method="POST" action="{% url 'billow:login' %}">
+                {% csrf_token %}
+                <div class="eaLogin-inputWrap">
+              <input type="text" id="username" name="username" class="ebInput eb_wMargin eaLogin-loginUsername" placeholder="username" required="" />
+
+              <input type="password" id="password" name="password" class="ebInput eb_wMargin eaLogin-loginUsername" placeholder="password" required="" />
+              <input type="hidden" value={{next}} name="next" />
+
+              <button type="submit" class="ebBtn eaLogin-formButton">
+              <i class="ebIcon ebIcon_rightArrow"></i>
+              </button>
+
+              </div>
+              </form>
+             </div>
+             <p class="eaLogin-copy"><span>&#169;</span> Ericsson Enterprise AB, 2023. All rights reserved.</p>
+          </div>
+         </div>
+		{% endif %}
+                {% if result %}
+                <div class="ui-notification error clickable" style="bottom: 20px; right: 10px;">
+                  <i class="glyphicon glyphicon-remove"></i>
+                  <div class="message">{{result}}</div>
+                </div>
+              {% endif %}
+
+{% endblock content %}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+{% extends 'main.html' %}
+{%block content %}
+<html>
+<head>
+  <title>Cloud Provider Cost Graphs</title>
+  <style>
+    /* Flexbox container to display charts side by side */
+    .chart-container {
+        display: flex;
+        justify-content: space-around;
+        padding-top: 50px; /* Add padding to the top */
+        text-align: center; /* Center the content */
+    }
+
+    /* Set the width of each chart based on the number of data points */
+    .chart-container canvas {
+        max-height: 600px; /* Set a fixed maximum height for all charts */
+        width: 100%; /* Set the initial width to 100% to fill available space */
+        min-width: 300px; /* Set a minimum width for the charts */
+        max-width: 600px; /* Set a maximum width for the charts */
+    }
+</style>
+</head>
+<body>
+  <div class="chart-container">
+    <div>
+      <h1>AWS Cost Stats</h1>
+      <canvas id="awsChart" width="600" height="400"></canvas>
+    </div>
+    <div>
+      <h1>GCP Cost Stats</h1>
+      <canvas id="gcpChart" width="600" height="400"></canvas>
+    </div>
+    <div>
+      <h1>Azure Cost Stats</h1>
+      <canvas id="azureChart" width="600" height="400"></canvas>
+    </div>
+  </div>
+
+  {% if start_date %}
+  <p>Selected Dates: {{ start_date }} to {{ end_date }}</p>
+  {% endif %}
+
+  <form action="{% url 'billow:graph_cost' %}" method="get">
+
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDateInput" name="start_date">
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDateInput" name="end_date">
+
+    <!-- Add a button to update the chart data based on selected dates -->
+    <button id="updateChartButton" type="submit">Update Charts</button>
+
+  </form>
+    <button id="toggleChartButton">Toggle Chart Type</button>
+
+  <!-- Add a button to toggle chart type -->
+
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Data for AWS, GCP, and Azure
+    let awsData = {
+      labels: [{% for day in days_in_range %}"{{ day }}",{% endfor %}],
+      datasets: [{
+        label: "AWS Cost per Day",
+        data: [{% for cost in aws_cost_list %}{{ cost }},{% endfor %}],
+        borderColor: 'blue',
+        borderWidth: 1,
+        fill: false
+      }]
+    };
+
+    let gcpData = {
+      labels: [{% for day in days_in_range %}"{{ day }}",{% endfor %}],
+      datasets: [{
+        label: "GCP Cost per Day",
+        data: [{% for cost in gcp_cost_list %}{{ cost }},{% endfor %}],
+        borderColor: 'purple',
+        borderWidth: 1,
+        fill: false
+      }]
+    };
+
+    let azureData = {
+      labels: [{% for day in days_in_range %}"{{ day }}",{% endfor %}],
+      datasets: [{
+        label: "Azure Cost per Day",
+        data: [{% for cost in azure_cost_list %}{{ cost }},{% endfor %}],
+        borderColor: 'magenta',
+        borderWidth: 1,
+        fill: false
+      }]
+    };
+
+    // Create charts with default data for the entire month of June
+    const awsCtx = document.getElementById('awsChart').getContext('2d');
+    const gcpCtx = document.getElementById('gcpChart').getContext('2d');
+    const azureCtx = document.getElementById('azureChart').getContext('2d');
+
+    const awsChart = new Chart(awsCtx, {
+      type: 'line',
+      data: awsData,
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Days'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Cost'
+            }
+          }
+        }
+      }
+    });
+
+    const gcpChart = new Chart(gcpCtx, {
+      type: 'line',
+      data: gcpData,
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Days'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Cost'
+            }
+          }
+        }
+      }
+    });
+
+    const azureChart = new Chart(azureCtx, {
+      type: 'line',
+      data: azureData,
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Days'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Cost'
+            }
+          }
+        }
+      }
+    }); function updateCharts(startDate, endDate) {
+      // Convert start and end dates to JavaScript Date objects
+      const startDateObj = new Date(startDate);
+      const endDateObj = new Date(endDate);
+
+      // Loop through the original dataset and set data to null for dates outside the selected range
+      awsChart.data.datasets[0].data = awsData.datasets[0].data.map((cost, index) => {
+        const dayDateObj = new Date(awsData.labels[index]);
+        return dayDateObj >= startDateObj && dayDateObj <= endDateObj ? cost : null;
+      });
+
+      gcpChart.data.datasets[0].data = gcpData.datasets[0].data.map((cost, index) => {
+        const dayDateObj = new Date(gcpData.labels[index]);
+        return dayDateObj >= startDateObj && dayDateObj <= endDateObj ? cost : null;
+      });
+
+      azureChart.data.datasets[0].data = azureData.datasets[0].data.map((cost, index) => {
+        const dayDateObj = new Date(azureData.labels[index]);
+        return dayDateObj >= startDateObj && dayDateObj <= endDateObj ? cost : null;
+      });
+
+      // Update the labels to show only those within the selected date range
+      const awsDataFiltered = awsData.labels.filter((day) => {
+        const dayDateObj = new Date(day);
+        return dayDateObj >= startDateObj && dayDateObj <= endDateObj;
+      });
+
+      const gcpDataFiltered = gcpData.labels.filter((day) => {
+        const dayDateObj = new Date(day);
+        return dayDateObj >= startDateObj && dayDateObj <= endDateObj;
+      });
+
+      const azureDataFiltered = azureData.labels.filter((day) => {
+        const dayDateObj = new Date(day);
+        return dayDateObj >= startDateObj && dayDateObj <= endDateObj;
+      });
+
+      // Update the charts' labels with filtered data
+      awsChart.data.labels = awsDataFiltered;
+      gcpChart.data.labels = gcpDataFiltered;
+      azureChart.data.labels = azureDataFiltered;
+
+      // Update the charts
+      awsChart.update();
+      gcpChart.update();
+      azureChart.update();
+    }
+    // Get the button elements and input elements
+    const toggleChartButton = document.getElementById('toggleChartButton');
+    const updateChartButton = document.getElementById('updateChartButton');
+    const startDateInput = document.getElementById('startDateInput');
+    const endDateInput = document.getElementById('endDateInput');
+
+    // Add event listener to the toggle button
+    toggleChartButton.addEventListener('click', () => {
+      // Toggle between 'line' and 'bar' chart types
+      awsChart.config.type = awsChart.config.type === 'line' ? 'bar' : 'line';
+      gcpChart.config.type = gcpChart.config.type === 'line' ? 'bar' : 'line';
+      azureChart.config.type = azureChart.config.type === 'line' ? 'bar' : 'line';
+
+      // Update the charts
+      awsChart.update();
+      gcpChart.update();
+      azureChart.update();
+    });
+
+    updateChartButton.addEventListener('click', () => {
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+      // Debugging: Check if the input values are correctly retrieved
+      console.log('Start Date:', startDate);
+      console.log('End Date:', endDate);
+
+      // Call the function to update the charts with the selected date range
+      updateCharts(startDate, endDate);
+
+      // Display the selected dates after the charts are updated
+    });
+
+  </script>
+</body>
+{%endblock%}
+</html>

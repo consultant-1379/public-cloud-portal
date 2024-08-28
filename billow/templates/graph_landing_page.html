@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+{% extends 'main.html' %}
+{%block content %}
+
+<head>
+    <style>
+        body {
+            padding-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="content" ng-show="!transitioning" style>
+        <section class="container">
+            <section ui-view class style>
+                <h1>Graphs</h1>
+                <a href="/graph_cost"><button class="btn btn-primary" type="submit">Cost Graphs</button></a>
+                <a href="/graph_resources"><button class="btn btn-primary" type="submit">Resource Graphs</button></a>
+            </section>
+</body>
+{%endblock%}

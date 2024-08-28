@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+{% extends 'main.html' %}
+{%block content %}
+
+<head>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .page_container {
+            text-align: center;
+            padding-top: 50px
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            margin-top: 10px;
+            padding: 10px 20px;
+        }
+
+        .message-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
+
+        .message-content {
+            text-align: center;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px 20px;
+        }
+
+        .success {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .error {
+            background-color: #fff;
+            color: #000;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var okButton = document.getElementById('ok-button');
+            var messagePopup = document.getElementById('message-popup');
+
+            okButton.addEventListener('click', function () {
+                messagePopup.style.display = 'none';
+            });
+        });
+    </script>
+</head>
+<div class="page_container">
+    <h1>GCP Instance</h1>
+    {% if messages %}
+    <div id="message-popup" class="message-popup">
+        <div class="message-content">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+            <button id="ok-button" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+    {% endif %}
+    <form action="{% url 'billow:create_gcp_instance' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_instance_name">Name:</label>
+            <input type="text" name="instance_name" id="id_name" class="form-control" required
+                placeholder="Enter a name">
+        </div>
+        <div class="form-group">
+            <label for="id_zone">Zone:</label>
+            <select name="zone" id="id_zone" class="form-control" required>
+                <option value="" disabled selected hidden>Select an zone</option>
+                {% for zone_names in zones %}
+                <option value="{{ zone_names.zone }}">{{ zone_names.zone }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_cpu_series">Cpu Series:</label>
+            <select name="cpu_series" id="cpu_series" class="form-control" required>
+                <option value="" disabled selected hidden>Select a cpu series</option>
+                {% for cpu_serie in cpu_series %}
+                <option value="{{ cpu_serie.series}}" title="{{ cpu_serie.ram }}GB of Ram / {{cpu_serie.cpu}} CPU">{{ cpu_serie.series }} ({{ cpu_serie.ram }}GB of Ram / {{cpu_serie.cpu}} CPU)</option>
+
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="project_id">project_id:</label>
+            <input type="text" name="project_id" id="project_id" class="form-control" required
+                placeholder="Enter a name">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Instance</button>
+    </form>
+</div>
+{%endblock%}

@@ -1,0 +1,78 @@
+{% load static %}
+
+<!-- Header -->
+
+<header header-view class="navbar navbar-fixed-top navbar-inverse"
+	ng-show="navbarActive">
+	<div class="container" ng-controller="HeaderController as vm">
+		<div class="navbar-header">
+			<button id="navbar-toggle" class="navbar-toggle" type="button"
+				ng-click="vm.navbarToggle()">
+				<span class="sr-only">Toggle navigation</span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a ui-sref="home" class="navbar-brand" href="/"><img src="{% static 'img/ericsson-logo-blue.png' %}" style="display:inline-block"> Billow</a>
+		</div>
+		<nav class="navbar-collapse collapse" uib-collapse="!vm.isCollapsed"
+			role="navigation" style="height: 0px;">
+			{% if request.user.is_authenticated %}
+			<ul class="nav navbar-nav">
+				<li><a href="/billow_get_bill">Billing</a>
+				<li><a href="/manage_instances">Manage Instances</a>
+					<li><a href="/graph_landing_page">Graphs</a>
+					{% if request.user.username == "admin" %}
+				<li><a href="/create_instances">Create Instances</a>
+					{% endif %}
+				<li><a href="/project_inventory">Project Inventory</a></li>
+			</ul>
+			{% endif %}
+			<ul class="nav navbar-nav navbar-right">
+				<li><a date-toggle="tooltip" title="Version" target="_blank"
+					href=""> <span></span>
+				</a></li>
+				<li>
+					<div class="ebSystemBarComponent-body"></div>
+				</li> {% if request.user.is_authenticated %}
+				<li uib-dropdown style="cursor: pointer;" class="dropdown open">
+					<a id="user-username" class="dropdown-toggle"
+					data-toggle="dropdown" uib-dropdown-toggle aria-haspopup="true"
+					aria-expanded="true"> <span class="ldap-username">{{ request.user.username }}</span>
+				</a>
+				</li> {% else %}
+				<li ng-repeat="item in vm.menu.items | orderBy: 'position'"
+					ng-if="item.shouldRender(vm.authetication.user);"
+					ng-switch="item.type"
+					ng-class="{ dropdown: item.type === 'dropdown' }"
+					ui-sref-active="active" class
+					uib-dropdown="item.type === 'dropdown'"><a ng-switch-default
+					ui-sref="Sign in" ng-click="vm.navbarToggle()"
+					ng-bind="item.title" href="/login/">Sign in</a>
+				</li> {% endif %}
+				</li> {% if request.user.is_authenticated %}
+				<li ng-repeat="item in vm.menu.items | orderBy: 'position'"
+					ng-if="item.shouldRender(vm.authetication.user);"
+					ng-switch="item.type"
+					ng-class="{ dropdown: item.type === 'dropdown' }"
+					ui-sref-active="active" class
+					uib-dropdown="item.type === 'dropdown'"><a ng-switch-default
+					ui-sref="Log Out" ng-click="vm.navbarToggle()"
+					ng-bind="item.title" href="/logout/">Log Out</a>
+				</a>
+				</li> {% else %}
+				<li ng-repeat="item in vm.menu.items | orderBy: 'position'"
+					ng-if="item.shouldRender(vm.authetication.user);"
+					ng-switch="item.type"
+					ng-class="{ dropdown: item.type === 'dropdown' }"
+					ui-sref-active="active" class
+					uib-dropdown="item.type === 'dropdown'"><a ng-switch-default
+					ui-sref="Log Out" ng-click="vm.navbarToggle()"
+					ng-bind="item.title" href="/"></a>
+				</li> {% endif %}
+					</ul>
+				</li>
+			</ul>
+		</nav>
+	</div>
+</header>
+<!-- End Header -->

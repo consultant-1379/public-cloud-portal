@@ -1,0 +1,312 @@
+<!-- index.html -->
+{% extends 'main.html' %}
+{% block content %}
+<html>
+<head>
+    <style>
+        .table-title {
+            text-align: center;
+        }
+
+        .active {
+            background-color: #D0D0D0;
+        }
+
+        body {
+            padding-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Public Cloud Provider Costs</h2>
+    <p>Public Cloud Costs from {{ dates.start_date }} to {{ dates.end_date }}</p>
+
+	<!--TODO: Shorten Code-->
+	{% if user_details.username == "admin" %}
+	<div class="tab">
+		<button class="tablinks" onclick="openTable(event, 'Overview')" id="defaultOpen">Overview</button>
+		<button class="tablinks" onclick="openTable(event, 'ENM')">ENM</button>
+		<button class="tablinks" onclick="openTable(event, 'EO')">EO</button>
+		<button class="tablinks" onclick="openTable(event, 'EIC')">EIC</button>
+	</div>
+	{% elif user_details.program == "ENM" %}
+	<div class="tab">
+		<button class="tablinks" onclick="openTable(event, 'Overview')">Overview</button>
+		<button class="tablinks" onclick="openTable(event, 'ENM')" id="defaultOpen">ENM</button>
+		<button class="tablinks" onclick="openTable(event, 'EO')">EO</button>
+		<button class="tablinks" onclick="openTable(event, 'EIC')">EIC</button>
+	</div>
+    {% elif user_details.program == "EO" %}
+	<div class="tab">
+		<button class="tablinks" onclick="openTable(event, 'Overview')">Overview</button>
+		<button class="tablinks" onclick="openTable(event, 'ENM')">ENM</button>
+		<button class="tablinks" onclick="openTable(event, 'EO')" id="defaultOpen">EO</button>
+		<button class="tablinks" onclick="openTable(event, 'EIC')">EIC</button>
+	</div>
+    {% elif user_details.program == "EIC" %}
+	<div class="tab">
+		<button class="tablinks" onclick="openTable(event, 'Overview')">Overview</button>
+		<button class="tablinks" onclick="openTable(event, 'ENM')">ENM</button>
+		<button class="tablinks" onclick="openTable(event, 'EO')">EO</button>
+		<button class="tablinks" onclick="openTable(event, 'EIC')" id="defaultOpen">EIC</button>
+	</div>
+	{% endif %}
+
+    <div id="Overview" class="tabcontent">
+        <table class="table">
+            <h4 class="table-title">Public Cloud Costs Overview</h4>
+            <thead>
+                <tr>
+                    <th scope="col">Cloud Provider</th>
+                    <th scope="col">Cost (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td scope="row">AWS Cost</td>
+                    <td>{{ costs.aws_total }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Azure Cost</td>
+                    <td>{{ costs.azure_total }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">GCP Cost</td>
+                    <td>{{ costs.gcp_total }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Total Cost</td>
+                    <td>{{ costs.total_cost }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="ENM" class="tabcontent">
+        <table class="table">
+            <h4 class="table-title">ENM Public Cloud Costs</h4>
+            {% if user_details.username == "admin" %}
+            <thead>
+                <tr>
+                    <th scope="col">Cloud Provider</th>
+                    <th scope='col'>Team</th>
+                    <th scope="col">Cost (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for teams in user_details.teams.ENM_teams %}
+                        <td scope="row">AWS Cost</td>
+                        <td>{{ teams.team_name }}</td>
+                        <td>{{ costs.aws_total }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+            {% else %}
+            <thead>
+                <tr>
+                    <th scope="col">Cloud Provider</th>
+                    <th scope="col">Team</th>
+                    <th scope="col">Cost (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td scope="row">AWS Cost</td>
+                    <td>{{ user_details.team }}</td>
+                    <td>{{ costs.aws_total }}</td>
+                </tr>
+            </tbody>
+            {% endif %}
+        </table>
+    </div>
+
+    <div id="EO" class="tabcontent">
+        <table class="table">
+            <h4 class="table-title">EO Public Cloud Costs</h4>
+            {% if user_details.username == "admin" %}
+            <thead>
+                <tr>
+                    <th scope="col">Cloud Provider</th>
+                    <th scope='col'>Team</th>
+                    <th scope="col">Cost (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for teams in user_details.teams.EO_teams %}
+                        <td scope="row">GCP Cost</td>
+                        <td>{{ teams.team_name }}</td>
+                        <td>{{ costs.gcp_total }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+            {% else %}
+            <thead>
+                <tr>
+                    <th scope="col">Cloud Provider</th>
+                    <th scope="col">Team</th>
+                    <th scope="col">Cost (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td scope="row">GCP Cost</td>
+                    <td>{{ user_details.team }}</td>
+                    <td>{{ costs.gcp_total }}</td>
+                </tr>
+            </tbody>
+            {% endif %}
+        </table>
+    </div>
+
+    <div id="EIC" class="tabcontent">
+        <table class="table">
+            <h4 class="table-title">EIC Public Cloud Costs</h4>
+            {% if user_details.username == "admin" %}
+            <thead>
+                <tr>
+                    <th scope="col">Cloud Provider</th>
+                    <th scope='col'>Team</th>
+                    <th scope="col">Cost (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for teams in user_details.teams.EIC_teams %}
+                        <td scope="row">Azure Cost</td>
+                        <td>{{ teams.team_name }}</td>
+                        <td>{{ costs.azure_total }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+            {% else %}
+            <thead>
+                <tr>
+                    <th scope="col">Cloud Provider</th>
+                    <th scope="col">Team</th>
+                    <th scope="col">Cost (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td scope="row">Azure Cost</td>
+                    <td>{{ user_details.team }}</td>
+                    <td>{{ costs.azure_total }}</td>
+                </tr>
+            </tbody>
+            {% endif %}
+        </table>
+    </div>
+
+    <a href="#" id="download-pdf-btn" class="btn btn-info">Download PDF</a>
+    <a href="#" id="download-excel-btn" class="btn btn-info">Download Excel</a>
+
+    <script>
+        let currentTableId = null;
+        function openTable(evt, tableName) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                if ("{{ user_details.username }}" === "admin") {
+                    document.getElementById(tableName).style.display = "block";
+                    evt.currentTarget.className += " active";
+                    currentTableId = tableName;
+                } else {
+                    currentTableId = tableName;
+                    document.getElementById(tableName).style.display = "block";
+                    evt.currentTarget.className += " active";
+                    document.getElementById("defaultOpen").click();
+                    if ( evt.currentTarget.id !== "defaultOpen" ) {
+                        alert("You don't have permission to open this!")
+                    }
+                }
+        }
+        document.getElementById("defaultOpen").click();
+
+        function getCurrentTableId() {
+            return currentTableId
+        }
+    </script>
+</body>
+</html>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.16/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+
+<script>
+function downloadPDF(filename, htmlContent) {
+    var activeTableId = getCurrentTableId();
+    html2canvas(document.querySelector("#" + activeTableId)).then(canvas => {
+        // create a new jsPDF instance
+        var doc = new jsPDF({
+            orientation: 'landscape' // set the orientation to landscape
+        });
+
+        // add the canvas to the PDF
+        var imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 10, 10, 270, 0);
+
+        // set the font size and table width
+        doc.setFontSize(8);
+
+        // save the PDF to a file
+        doc.save(filename);
+    });
+}
+
+// add event listener to the download PDF button
+document.getElementById("download-pdf-btn").addEventListener("click", function () {
+    var htmlContent = document.documentElement.outerHTML;
+    downloadPDF("Bill.pdf", htmlContent);
+});
+
+
+function downloadExcel(filename) {
+    // Get the table element
+    var activeTableId = getCurrentTableId();
+    var table = document.getElementById(activeTableId);
+
+    // Convert the table to a workbook
+    var workbook = XLSX.utils.table_to_book(table);
+
+    // Convert the workbook to an Excel file
+    var excelFile = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+    // Save the Excel file
+    saveAs(new Blob([excelFile], { type: "application/octet-stream" }), filename);
+}
+
+</script>
+
+<script>
+// Define the saveAs function for saving files
+function saveAs(blob, filename) {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    var url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// add event listener to the download Excel button
+document.getElementById("download-excel-btn").addEventListener("click", function () {
+    downloadExcel("Bill.xlsx");
+});
+</script>
+
+<script>var jsPDF = window.jspdf.jsPDF;</script>
+
+{% endblock %}

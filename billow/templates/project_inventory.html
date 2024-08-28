@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+{% extends 'main.html' %}
+{% block content %}
+<html>
+
+<head>
+    <style>
+        .table-title {
+            text-align: center;
+        }
+
+        .active {
+            background-color: #D0D0D0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th {
+            background-color: #F0F0F0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        td {
+            padding: 8px;
+        }
+
+        body {
+            padding-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Project Inventory</h1>
+    <a href="{% url 'billow:program_graph_cost' 'AWS' %}" class="btn btn-primary">Cost</a>
+    <!--Change 'AWS' to 'GCP' or 'Azure' for their graphs-->
+    <a href="{% url 'billow:program_resource_graph' 'AWS' %}" class="btn btn-primary">Ram/Cpu</a>
+    <!--Add more buttons for othe providers-->
+    {% for project in project_data %}
+    <h2>{{ project.project_name }} Instances</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Team Name</th>
+                <th>Cloud Provider</th>
+                <th>Instance ID</th>
+                <th>Instance Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for provider_data in project.providers %}
+            <tr>
+                <td>{{ provider_data.team_name }}</td>
+                <td>{{ provider_data.cloud_provider }}</td>
+                <td>{{ provider_data.instance_id }}</td>
+                <td>{{ provider_data.instance_name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</body>
+
+</html>
+{% endblock %}

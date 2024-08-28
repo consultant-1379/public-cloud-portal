@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+{% extends 'main.html' %}
+{% block content %}
+<html>
+
+<head>
+    <title>Cloud Provider Resource Graphs</title>
+    <style>
+        /* Flexbox container to display charts side by side */
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 50px; /* Add padding to the top */
+            text-align: center; /* Center the content */
+        }
+
+        /* Set the width of each chart based on the number of data points */
+        .chart-container canvas {
+            height: 400px; /* Set a fixed height for all charts */
+            width: 600px; /* Set a fixed width for all charts */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chart-container">
+        <!-- CPU Usage Graph -->
+        <div>
+            <h1 style="font-size: 16px;">{{ provider_name|title }} CPU Usage</h1>
+            <canvas id="{{ provider_name }}CpuChart"></canvas>
+        </div>
+        <!-- RAM Usage Graph -->
+        <div>
+            <h1 style="font-size: 16px;">{{ provider_name|title }} RAM Usage</h1>
+            <canvas id="{{ provider_name }}RamChart"></canvas>
+        </div>
+    </div>
+
+    {% if start_date %}
+    <p>Selected Dates: {{ start_date }} to {{ end_date }}</p>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const daysInRange = [{% for day in days_in_range %}"{{ day }}",{% endfor %}];
+            const cpuResources = [{% for cpu in provider_cpus %}{{ cpu }},{% endfor %}];
+            const ramResources = [{% for ram in provider_ram %}{{ ram }},{% endfor %}];
+
+            console.log('Days in Range:', daysInRange);
+            console.log('CPU Resources:', cpuResources);
+            console.log('RAM Resources:', ramResources);
+
+            const cpuData = {
+                labels: daysInRange,
+                datasets: [{
+                    label: "{{ provider_name|title }} CPU usage per Day",
+                    data: cpuResources,
+                    borderColor: 'magenta',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            };
+
+            const ramData = {
+                labels: daysInRange,
+                datasets: [{
+                    label: "{{ provider_name|title }} RAM usage per Day",
+                    data: ramResources,
+                    borderColor: 'red',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            };
+
+            const cpuCtx = document.getElementById('{{ provider_name }}CpuChart').getContext('2d');
+            const ramCtx = document.getElementById('{{ provider_name }}RamChart').getContext('2d');
+
+            const cpuChart = new Chart(cpuCtx, {
+                type: 'line',
+                data: cpuData,
+                // Add options if needed
+            });
+
+            const ramChart = new Chart(ramCtx, {
+                type: 'line',
+                data: ramData,
+                // Add options if needed
+            });
+
+            // Your chart update and toggle logic can be added here
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
+</html>

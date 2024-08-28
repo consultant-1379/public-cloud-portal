@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Billow</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    <script src="{% static 'jquery/jquery.min.js' %}"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <!-- Alternative to Bootstrap 3 Glyphicons -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+
+  </head>
+  <body>
+    <nav class="nav-cool" role="navigation" id="navbar">
+      <a href="{% url 'home' %}">
+        <img src="{% static 'logo\logo.png' %}" alt="Billow Logo" class="logo">
+    </a>
+
+      <div class="main_menu_side">
+        {% if user.is_authenticated %}
+            <a href="{% url 'billow:billow_get_bill' %}">Billing</a>
+            <a href="{% url 'billow:manage_instances' %}">Manage Instances</a>
+          <a href="{% url 'billow:logout' %}">Log Out<a/>
+
+        {% else %}
+          <a href="{% url 'billow:login' %}">Log in</a>
+        {% endif %}
+      </div>
+    </nav>
+    <div class="container mycontent">
+      {% block content %}
+      {% endblock %}
+    </div>
+  </body>
+</html>

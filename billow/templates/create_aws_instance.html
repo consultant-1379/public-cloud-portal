@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+{% extends 'main.html' %}
+{%block content %}
+
+<head>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .page_container {
+            text-align: center;
+            padding-top: 50px
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            margin-top: 10px;
+            padding: 10px 20px;
+        }
+
+        .message-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
+
+        .message-content {
+            text-align: center;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px 20px;
+        }
+
+        .success {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .error {
+            background-color: #fff;
+            color: #000;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var okButton = document.getElementById('ok-button');
+            var messagePopup = document.getElementById('message-popup');
+
+            okButton.addEventListener('click', function () {
+                messagePopup.style.display = 'none';
+            });
+        });
+    </script>
+</head>
+<div class="page_container">
+    <h1>AWS Instance</h1>
+    {% if messages %}
+    <div id="message-popup" class="message-popup">
+        <div class="message-content">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+            <button id="ok-button" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+    {% endif %}
+    <form action="{% url 'billow:create_aws_instance' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_instance_name">Name:</label>
+            <input type="text" name="instance_name" id="id_name" class="form-control" required
+                placeholder="Enter a name">
+        </div>
+        <div class="form-group">
+            <label for="id_image_id">Image Id:</label>
+            <select name="image_id" id="id_image_id" class="form-control" required>
+                <option value="" disabled selected hidden>Select an Image</option>
+                {% for image in image_ids %}
+                <option value="{{ image.image_ID }}">{{ image.image_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_instance_type">Instance Type:</label>
+            <select name="instance_type" id="id_instance_type" class="form-control" required>
+                <option value="" disabled selected hidden>Select an instance type</option>
+                {% for instance_type in instance_types %}
+                <option value="{{ instance_type.instance_type }}">{{ instance_type.instance_type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_key_pair">Key Pair:</label>
+            <select name="key_name" id="id_key_name" class="form-control" required>
+                <option value="" disabled selected hidden>Select a keyname</option>
+                {% for key_name in key_names %}
+                <option value="{{ key_name.keyname }}">{{ key_name.keyname }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_storage">Storage (GiB):</label>
+            <input type="number" name="storage" id="id_storage" class="form-control" required placeholder="Enter storage size (GiB)">
+        </div>
+        <div class="form-group">
+            <label for="id_region">Region:</label>
+            <input type="text" name="region" id="id_name" class="form-control" value="eu-west-1" readonly>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Instance</button>
+    </form>
+</div>
+{%endblock%}

@@ -1,0 +1,92 @@
+{%extends 'gcp_base.html'%}
+{%block content%}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instances</title>
+</head>
+<body>
+    <h2>Instances for {{project_id}}</h2>
+    {% for name, zone in instance_dict.items %}
+    <div class="row">
+      <div class="col-sm-3 mb-3 mb-sm-0">
+        <div class="card">
+          <div class="card-body">{{name}}
+            <h5 class="card-title"></h5>
+            <p class="card-text">{{zone}}</p>
+            <form class="start-form" action="{% url 'start_instance' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="instance_name" value="{{ name }}">
+              <input type="hidden" name="zone" value="{{ zone }}">
+              <input type="hidden" name="project_id" value="{{ project_id }}">
+              <button class="btn btn-primary" type="submit">start Instance</button>
+          </form>
+          <br>
+          <form class="stop-form" action="{% url 'stop_instance' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="instance_name" value="{{ name }}">
+              <input type="hidden" name="zone" value="{{ zone }}">
+              <input type="hidden" name="project_id" value="{{ project_id }}">
+              <button class="btn btn-primary" type="submit">stop Instance</button>
+          </form>
+          <div class="instance-status">Instance Status: </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <script>
+        var startForms = document.getElementsByClassName('start-form');
+        var stopForms = document.getElementsByClassName('stop-form');
+        var instanceStatuses = document.getElementsByClassName('instance-status');
+
+        Array.from(startForms).forEach(function(form, index) {
+          form.addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent form submission
+
+            // Send an asynchronous request to start the instance
+            fetch(this.action, {
+              method: 'POST',
+              body: new FormData(this)
+            })
+            .then(function(response) {
+              if (response.ok) {
+                // Instance started successfully, update the corresponding instance status
+                instanceStatuses[index].textContent = 'Instance Status: Started';
+              } else {
+                // Handle error response if necessary
+              }
+            })
+            .catch(function(error) {
+              // Handle network error if necessary
+            });
+          });
+        });
+
+        Array.from(stopForms).forEach(function(form, index) {
+          form.addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent form submission
+
+            // Send an asynchronous request to stop the instance
+            fetch(this.action, {
+              method: 'POST',
+              body: new FormData(this)
+            })
+            .then(function(response) {
+              if (response.ok) {
+                // Instance stopped successfully, update the corresponding instance status
+                instanceStatuses[index].textContent = 'Instance Status: Stopped';
+              } else {
+                // Handle error response if necessary
+              }
+            })
+            .catch(function(error) {
+              // Handle network error if necessary
+            });
+          });
+        });
+    </script>
+    {%endblock%}
+</body>
+</html>

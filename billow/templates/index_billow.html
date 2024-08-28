@@ -1,0 +1,26 @@
+<!-- index.html -->
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+<html>
+	<section class="content" ng-show="!transitioning" style>
+		<section class="container">
+		<section ui-view class style>
+		<section>
+
+		<div class="home-page-welcome">
+		<h1>Billow</h1>
+		</div>
+
+		<br>
+		<br>
+		<br>
+		<br>
+	<head>Welcome to Billow</head>
+	<body>
+		<p>Billow is a proof-of-concept Public Cloud cost tool.</p>
+		<img src="{% static 'logo\logo.png' %}" alt="Billow Logo" class="logo">
+		{% endblock %}
+	</body>
+</section>
+</html>

@@ -1,0 +1,262 @@
+{%extends 'main.html'%}
+{%block content%}
+<!DOCTYPE html>
+<head>
+  <style>
+    .instance-table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px; /* Increase the spacing between tables */
+    }
+
+    .instance-table th {
+      font-size: 20px; /* Increase the heading font size */
+    }
+
+    .instance-table th,
+    .instance-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .right-align {
+        text-align: right;
+    }
+</style>
+</head>
+<body>
+<section class="content" ng-show="!transitioning" style>
+  <section class="container">
+  <section ui-view class style>
+  <section>
+
+  <div class="home-page-welcome">
+  <h1>Manage Instances</h1>
+  <h3>Team name: {{user_details.team_name}}</h3>
+  <h3>Username: {{user_details.username}}</h3>
+  <h3>Clouds: {%for clouds in user_accounts%}
+                {{clouds.cloud_provider}}
+              {%endfor%}
+  </h5></h3>
+  </div>
+  <br>
+  <br>
+  <div class="tab">
+    {% if user_details.username == "admin" %}
+        <a href="{% url 'billow:manage_instances' %}" class="btn btn-primary" >Overview</a>
+    {% endif %}
+    {% for program in programs %}
+        {% if user_details.program|lower|striptags == program|lower|striptags or user_details.username == "admin" %}
+            <a href="{% url 'billow:manage_instances' %}?program={{ program|striptags }}"  class="btn btn-primary">{{ program|striptags }}</a>
+        {% endif %}
+    {% endfor %}
+    <br>
+    <br>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+          <button class="btn btn-primary" onclick="showFilterTextbox('project_id')">Filter by Project ID</button>
+          <button class="btn btn-primary" onclick="showFilterTextbox('name')">Filter by Name</button>
+          <button class="btn btn-primary" onclick="showFilterTextbox('status')">Filter by Status</button>
+      </div>
+      <div>
+          <a href="{% url 'billow:create_instances' %}" class="btn btn-primary">Create Instance</a>
+          <a href="{% url 'billow:start_all_instances' %}" class="btn btn-primary">Start All Instances</a>
+          <a href="{% url 'billow:stop_all_instances' %}" class="btn btn-primary">Stop All Instances</a>
+      </div>
+  </div>
+    <div id="filterContainer" style="display: none;">
+      <input type="text" id="filterInput" onkeyup="filterInstances()" placeholder="Enter filter value">
+    </div>
+    <br>
+
+
+    <div class="col">
+  {% for clouds in user_accounts%}
+    <div class="row-md-4">
+      <h2 class="instance-heading">{{ clouds.cloud_provider}} Instances</h2>
+      {% if 'gcp' in clouds.cloud_provider|lower %}
+        <div class="card mb-3 gcp-instance-card">
+          <div class="card-body">
+            {% for project_id, instances in all_instance_info.gcp.items %}
+              <div class="project-instances">
+                <h4>Project ID: {{ project_id }}</h4>
+                <table class="instance-table">
+                  <thead>
+                    <tr>
+                      <th>Instance ID</th>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for vm in instances %}
+                      <div class="gcp_card">
+                      <tr>
+                        <td class="gcp-instance-project">{{ vm.project }}</td>
+                        <td class="gcp-instance-name">{{ vm.instance_name }}</td>
+                        <td class="instance-status">{{ vm.status }}</td>
+                        <td>
+                          <form class="action-form_gcp" action="{% url 'billow:instance_action' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="instance_name" value="{{ vm.instance_name|lower|striptags }}">
+                            <input type="hidden" name="zone" value="{{ vm.zone|lower|striptags }}">
+                            <input type="hidden" name="project_id" value="{{ vm.project|lower|striptags }}">
+                            <select class="action-select" name="actions">
+                              <option value="" selected disabled>Select Action</option>
+                              <option value="start_instance_gcp">Start Instance</option>
+                              <option value="stop_instance_gcp">Stop Instance</option>
+                              <option value="delete_instance_gcp">Delete Instance</option>
+                            </select>
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                          </form>
+                        </td>
+                      </tr>
+                      </div>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endfor %}
+          </div>
+          </div>
+          {% elif 'aws' in clouds|lower %}
+            <div class="card mb-3 aws-instance-card">
+              <div class="card-body">
+                <table class="instance-table">
+                  <thead>
+                    <tr>
+                      <th>Instance ID</th>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for vm in all_instance_info.aws %}
+                      <tr>
+                        <td class="aws-instance-project">{{ vm.instance_id }}</td>
+                        <td class="aws-instance-name">{{ vm.instance_name }}</td>
+                        <td class="aws-instance-status">{{ vm.status }}</td>
+                        <td>
+                          <form class="action-form_aws" action="{% url 'billow:instance_action' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="instance_id" value="{{ vm.instance_id }}">
+                            <select class="action-select" name="actions">
+                              <option value="" selected disabled>Select Action</option>
+                              <option value="start_instance_aws">Start Instance</option>
+                              <option value="stop_instance_aws">Stop Instance</option>
+                              <option value="delete_instance_aws">Delete Instance</option>
+                            </select>
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                          </form>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          {% elif 'azure' in clouds|lower %}
+            <div class="card mb-3 azure-instance-card">
+              <div class="card-body">
+                <table class="instance-table">
+                  <thead>
+                    <tr>
+                      <th>Instance ID</th>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for vm in all_instance_info.azure %}
+                      <tr>
+                        <td class="azure-instance-project">{{ vm.resource_group_name }}</td>
+                        <td class="azure-instance-name">{{ vm.instance_name }}</td>
+                        <td class="azure-instance-status">{{ vm.status }}</td>
+                        <td>
+                          <form class="action-form_azure" action="{% url 'billow:instance_action' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="resource_group" value="{{ vm.resource_group_name }}">
+                            <input type="hidden" name="instance_name" value="{{ vm.instance_name }}">
+                            <select class="action-select" name="actions">
+                              <option value="" selected disabled>Select Action</option>
+                              <option value="start_instance_azure">Start Instance</option>
+                              <option value="stop_instance_azure">Stop Instance</option>
+                              <option value="delete_instance_azure">Delete Instance</option>
+                            </select>
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                          </form>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+
+  <script>
+    function showFilterTextbox(option) {
+      document.getElementById("filterContainer").style.display = "block";
+      document.getElementById("filterInput").placeholder = "Enter filter value for " + option;
+      document.getElementById("filterInput").setAttribute("data-filter-option", option);
+    }
+
+    function filterInstances() {
+      var input = document.getElementById("filterInput");
+      var filter = input.value.toUpperCase();
+      var option = input.getAttribute("data-filter-option");
+      var instances = document.getElementsByClassName("card");
+
+      for (var i = 0; i < instances.length; i++) {
+        var instance = instances[i];
+        var filterValue = "";
+        var instanceType = instance.classList.contains("instance-table") ? "gcp" : instance.classList.contains("azure-instance-card") ? "azure" : "aws";
+
+        if (instanceType === "gcp") {
+          if (option === "project_id") {
+            filterValue = instance.getElementsByClassName("gcp-instance-project")[0].innerText;
+          } else if (option === "name") {
+            filterValue = instance.getElementsByClassName("gcp-instance-name")[0].innerText;
+          } else if (option === "status") {
+            filterValue = instance.getElementsByClassName("instance-status")[0].innerText;
+          }
+        } else if (instanceType === "azure") {
+          if (option === "project_id") {
+            filterValue = instance.getElementsByClassName("azure-instance-project")[0].innerText;
+          } else if (option === "name") {
+            filterValue = instance.getElementsByClassName("azure-instance-name")[0].innerText;
+          } else if (option === "status") {
+            filterValue = instance.getElementsByClassName("azure-instance-status")[0].innerText;
+          }
+        } else if (instanceType === "aws") {
+          if (option === "project_id") {
+            filterValue = instance.getElementsByClassName("aws-instance-project")[0].innerText;
+          } else if (option === "name") {
+            filterValue = instance.getElementsByClassName("aws-instance-name")[0].innerText;
+          } else if (option === "status") {
+            filterValue = instance.getElementsByClassName("aws-instance-status")[0].innerText;
+          }
+        }
+
+        if (filterValue.toUpperCase().indexOf(filter) > -1) {
+          instance.style.display = "";
+        } else {
+          instance.style.display = "none";
+        }
+      }
+    }
+  </script>
+
+  </section>
+    {%endblock%}
+
+</body>
+</html>
